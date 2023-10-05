@@ -23,10 +23,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Product'
+                $ref: '#/components/schemas/Products'
         '400':
           description: Random error
-  /product:
+  /product{id}:
     get:
       tags:
         - products
@@ -70,3 +70,7 @@ components:
           type: number
       xml:
         name: product
+    Products:
+      type: array
+      items:
+        $ref: '#/components/schemas/Product'
