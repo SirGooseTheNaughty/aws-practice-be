@@ -1,0 +1,15 @@
+{
+  "extends": "@serverless/eslint-config/node",
+  "root": true,
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "rules": {
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": true
+      }
+    ]
+  }
+}
