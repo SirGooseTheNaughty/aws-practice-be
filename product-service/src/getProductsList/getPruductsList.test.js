@@ -1,4 +1,4 @@
-import getProductsList from './index';
+import { getProductsList } from './index';
 import * as DbFunctions from '../utils/dbFunctions';
 
 jest.mock('../utils/dbFunctions');

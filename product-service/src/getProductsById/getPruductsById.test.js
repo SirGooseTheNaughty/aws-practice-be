@@ -1,4 +1,4 @@
-import getProductsById from './index';
+import { getProductsById } from './index';
 import * as DbFunctions from '../utils/dbFunctions';
 
 jest.mock('../utils/dbFunctions');
@@ -10,12 +10,12 @@ describe('getProductsById', () => {
     expect(res.message).toBe('Product id not specified');
   });
 
-  test('should return error if db read fails', async () => {
+  test('should return error if product is not found', async () => {
     DbFunctions.getDbProductById.mockImplementation(() => {
       throw new Error('test error');
     })
     const res = await getProductsById({ queryStringParameters: { id: 1 } });
-    expect(res.statusCode).toBe(400);
+    expect(res.statusCode).toBe(404);
     expect(res.message).toBe('test error');
   });
 

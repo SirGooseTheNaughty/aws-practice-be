@@ -1,10 +1,12 @@
 import { getDbProductById } from '../utils/dbFunctions';
+import { withCorsHeaders } from '../utils/middleware';
 
-const getProductsById = async (event) => {
+export const getProductsById = async (event) => {
   const { id } = event?.queryStringParameters || {};
 
   if (!id) {
     return {
+      headers: withCorsHeaders(),
       statusCode: 400,
       message: 'Product id not specified',
     };
@@ -13,12 +15,14 @@ const getProductsById = async (event) => {
   try {
     const product = await getDbProductById(id);
     return {
+      headers: withCorsHeaders(),
       statusCode: 200,
       body: JSON.stringify(product),
     };
   } catch (e) {
     return {
-      statusCode: 400,
+      headers: withCorsHeaders(),
+      statusCode: 404,
       message: e.message,
     };
   }
