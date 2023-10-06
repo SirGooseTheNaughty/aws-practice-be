@@ -5,7 +5,7 @@ jest.mock('../utils/dbFunctions');
 
 describe('getProductsById', () => {
   test('should return error product id is not provided', async () => {
-    const res = await getProductsById({ queryStringParameters: {} });
+    const res = await getProductsById({ pathParameters: {} });
     expect(res.statusCode).toBe(400);
     expect(res.message).toBe('Product id not specified');
   });
@@ -14,7 +14,7 @@ describe('getProductsById', () => {
     DbFunctions.getDbProductById.mockImplementation(() => {
       throw new Error('test error');
     })
-    const res = await getProductsById({ queryStringParameters: { id: 1 } });
+    const res = await getProductsById({ pathParameters: { id: 1 } });
     expect(res.statusCode).toBe(404);
     expect(res.message).toBe('test error');
   });
@@ -22,7 +22,7 @@ describe('getProductsById', () => {
   test('should return product from the db', async () => {
     const product = { id: 1, name: 'product 1', description: 'prod 1 desc' };
     DbFunctions.getDbProductById.mockReturnValue(Promise.resolve(product));
-    const res = await getProductsById({ queryStringParameters: { id: product.id } });
+    const res = await getProductsById({ pathParameters: { id: product.id } });
     expect(res.statusCode).toBe(200);
     expect(res.body).toBe(JSON.stringify(product));
   });

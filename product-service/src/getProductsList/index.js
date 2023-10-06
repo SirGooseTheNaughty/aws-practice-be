@@ -1,7 +1,7 @@
 import { getDbProducts } from '../utils/dbFunctions';
 import { withCorsHeaders } from '../utils/middleware';
 
-const getProductsList = async () => {
+export const getProductsList = async () => {
   try {
     const products = await getDbProducts();
     return {
