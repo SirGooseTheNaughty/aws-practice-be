@@ -26,7 +26,7 @@ paths:
                 $ref: '#/components/schemas/Products'
         '400':
           description: Random error
-  /product{id}:
+  /products/{id}:
     get:
       tags:
         - products

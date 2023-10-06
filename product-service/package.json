@@ -28,6 +28,8 @@
     "webpack-node-externals": "^3.0.0"
   },
   "dependencies": {
+    "@middy/core": "^4.6.4",
+    "@middy/http-cors": "^4.6.4",
     "source-map-support": "^0.5.21"
   }
 }

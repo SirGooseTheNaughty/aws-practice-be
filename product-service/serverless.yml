@@ -76,7 +76,7 @@ functions:
     handler: handler.getProductsById
     events:
       - httpApi:
-          path: /product
+          path: /products/{id}
           method: get
           cors: true
 #    The following are a few example events you can configure
