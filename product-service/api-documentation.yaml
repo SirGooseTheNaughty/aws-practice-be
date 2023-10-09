@@ -1,0 +1,76 @@
+openapi: 3.1.0
+info:
+  title: Leaf shop API
+  description: |-
+    Docs for the Leaf shop API. I'm only doing it for 4 points honestly.
+  version: 1.0.0
+servers:
+  - url: https://9b9no1dw79.execute-api.eu-west-1.amazonaws.com
+tags:
+  - name: products
+    description: Working with products
+paths:
+  /products:
+    get:
+      tags:
+        - products
+      summary: Get the list of products
+      description: Get the list of products
+      operationId: getProducts
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Products'
+        '400':
+          description: Random error
+  /products/{id}:
+    get:
+      tags:
+        - products
+      summary: Get the list of products
+      description: Get the list of products
+      operationId: getProductById
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: String ID of the product to get
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Random error
+        '404':
+          description: Product not found
+components:
+  schemas:
+    Product:
+      required:
+        - id
+        - name
+        - price
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+      xml:
+        name: product
+    Products:
+      type: array
+      items:
+        $ref: '#/components/schemas/Product'
