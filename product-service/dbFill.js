@@ -1,11 +1,11 @@
 const AWS = require('aws-sdk');
 const crypto = require('crypto');
-const productData = require('./src/mocks/products.json');
+const productsData = require('./src/mocks/products.json');
 
 AWS.config.update({ region: 'eu-west-1' });
 const docClient = new AWS.DynamoDB.DocumentClient();
 
-productData.forEach((product) => {
+productsData.forEach((product) => {
   const { title, description, price } = product;
   const newId = crypto.randomUUID();
   const quantity = Math.floor(Math.random() * 10);

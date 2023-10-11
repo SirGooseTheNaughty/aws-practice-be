@@ -21,7 +21,7 @@ describe('getProductsList', () => {
       throw new Error('test error');
     })
     const res = await getProductsList();
-    expect(res.statusCode).toBe(400);
+    expect(res.statusCode).toBe(500);
     expect(res.message).toBe('test error');
   });
 });
