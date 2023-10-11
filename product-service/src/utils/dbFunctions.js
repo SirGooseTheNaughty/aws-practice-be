@@ -1,5 +1,6 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, ScanCommand, GetCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, ScanCommand, GetCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
+import crypto from 'crypto';
 import { DB_NAMES } from './constants';
 
 const client = new DynamoDBClient({});
@@ -54,4 +55,20 @@ export const getDbProductById = async (productId) => {
     ...productItem,
     count: stockItem.count || 0,
   }
+};
+
+export const createDbProduct = async (productData) => {
+  const id = crypto.randomUUID();
+
+  await dynamo.send(
+    new PutCommand({
+      TableName: DB_NAMES.PRODUCTS,
+      Item: {
+        ...productData,
+        id,
+      },
+    })
+  );
+
+  return id;
 };
