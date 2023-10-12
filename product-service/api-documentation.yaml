@@ -2,10 +2,10 @@ openapi: 3.1.0
 info:
   title: Leaf shop API
   description: |-
-    Docs for the Leaf shop API. I'm only doing it for 4 points honestly.
-  version: 1.0.0
+    Docs for the Leaf shop API
+  version: 1.1.0
 servers:
-  - url: https://9b9no1dw79.execute-api.eu-west-1.amazonaws.com
+  - url: https://i20elx5698.execute-api.eu-west-1.amazonaws.com
 tags:
   - name: products
     description: Working with products
@@ -24,6 +24,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Products'
+        '500':
+          description: Server error
+    post:
+      tags:
+        - products
+      summary: Add a new product
+      description: Add a new product
+      operationId: createProduct
+      requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductToCreate'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            text/plain:
+              schema:
+                id
         '400':
           description: Random error
   /products/{id}:
@@ -48,25 +68,46 @@ paths:
               schema:
                 $ref: '#/components/schemas/Product'
         '400':
-          description: Random error
+          description: Product ID not specified
         '404':
           description: Product not found
+        '500':
+          description: Server error
 components:
   schemas:
     Product:
       required:
         - id
-        - name
+        - title
         - price
+        - count
       type: object
       properties:
         id:
           type: string
-        name:
+        title:
           type: string
         description:
           type: string
         price:
+          type: number
+        count:
+          type: number
+      xml:
+        name: product
+    ProductToCreate:
+      required:
+        - title
+        - price
+      type: object
+      properties:
+        title:
+          type: string
+        price:
+          type: number
+        description:
+          type: string
+        count:
           type: number
       xml:
         name: product

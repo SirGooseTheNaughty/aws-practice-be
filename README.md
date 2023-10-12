@@ -10,5 +10,6 @@ Frontend part is done under [this repo](https://github.com/SirGooseTheNaughty/aw
 APIs related to products:
 * getting the list of products
 * getting a product by ID
+* adding a new product
 
 See api-documentation.yml for a SWAGGER API docs
