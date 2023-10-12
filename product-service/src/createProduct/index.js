@@ -4,7 +4,7 @@ import { ERROR_MESSAGES, BadRequestError, InternalServerError } from '../utils/c
 
 export const createProduct = async (event = {}, context = {}) => {
   console.log(`Event: ${JSON.stringify(event)}. Context: ${JSON.stringify(context)}.`);
-  const { title, description, price } = JSON.parse(event.body);
+  const { title, description, price, stock } = JSON.parse(event.body);
 
   console.log(`Product data: ${JSON.stringify({ title, description, price, stock })}`);
 
