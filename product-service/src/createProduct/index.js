@@ -1,7 +1,6 @@
-import createError from 'http-errors';
 import { createDbProduct } from '../utils/dbFunctions';
 import { withCorsHeaders } from '../utils/middleware';
-import { ERROR_MESSAGES } from '../utils/constants';
+import { ERROR_MESSAGES, BadRequestError, InternalServerError } from '../utils/constants';
 
 export const createProduct = async (event = {}, context = {}) => {
   console.log(`Event: ${JSON.stringify(event)}. Context: ${JSON.stringify(context)}.`);
@@ -10,7 +9,7 @@ export const createProduct = async (event = {}, context = {}) => {
   console.log(`Product data: ${JSON.stringify({ title, description, price })}`);
 
   if (!title || isNaN(price)) {
-    return createError(400, { message: ERROR_MESSAGES.INVALID_PRODUCT_DATA })
+    return new BadRequestError(ERROR_MESSAGES.INVALID_PRODUCT_DATA);
   }
 
   try {
@@ -21,8 +20,7 @@ export const createProduct = async (event = {}, context = {}) => {
       body: id,
     };
   } catch (error) {
-    console.error(`Errored: ${JSON.stringify(error)}`);
-    return createError(500, error);
+    return new InternalServerError(error?.message);
   }
 };
 

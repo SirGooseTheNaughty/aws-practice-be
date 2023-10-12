@@ -1,6 +1,6 @@
-import createError from 'http-errors';
 import { getDbProducts } from '../utils/dbFunctions';
 import { withCorsHeaders } from '../utils/middleware';
+import { InternalServerError } from '../utils/constants';
 
 export const getProductsList = async (event = {}, context = {}) => {
   console.log(`Event: ${JSON.stringify(event)}. Context: ${JSON.stringify(context)}.`);
@@ -12,8 +12,7 @@ export const getProductsList = async (event = {}, context = {}) => {
       body: JSON.stringify(products),
     };
   } catch (error) {
-    console.error(`Errored: ${JSON.stringify(error)}`);
-    return createError(500, error);
+    return new InternalServerError(error?.message);
   }
 };
 

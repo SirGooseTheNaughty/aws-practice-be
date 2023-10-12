@@ -9,24 +9,25 @@ describe('getProductsById', () => {
     const productData = { description: 'test-description', price: 1 };
     const res = await createProduct({ body: JSON.stringify(productData) });
     expect(res.statusCode).toBe(400);
-    expect(res.message).toBe(ERROR_MESSAGES.INVALID_PRODUCT_DATA);
+    expect(res.body).toBe(JSON.stringify(ERROR_MESSAGES.INVALID_PRODUCT_DATA));
   });
 
   test('should return error product price is not provided', async () => {
     const productData = { title: 'test-title', description: 'test-description' };
     const res = await createProduct({ body: JSON.stringify(productData) });
     expect(res.statusCode).toBe(400);
-    expect(res.message).toBe(ERROR_MESSAGES.INVALID_PRODUCT_DATA);
+    expect(res.body).toBe(JSON.stringify(ERROR_MESSAGES.INVALID_PRODUCT_DATA));
   });
 
   test('should return error if something goes kaboom', async () => {
+    const errorMessage = 'test error';
     DbFunctions.createDbProduct.mockImplementation(() => {
-      throw new Error('test error');
-    })
+      throw new Error(errorMessage);
+    });
     const productData = { title: 'test-title', description: 'test-description', price: 1 };
     const res = await createProduct({ body: JSON.stringify(productData) });
     expect(res.statusCode).toBe(500);
-    expect(res.message).toBe('test error');
+    expect(res.body).toBe(JSON.stringify(errorMessage));
   });
 
   test('should return a created product id from the db', async () => {

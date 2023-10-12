@@ -17,11 +17,12 @@ describe('getProductsList', () => {
   });
 
   test('should return error if db read fails', async () => {
+    const errorMessage = 'test error';
     DbFunctions.getDbProducts.mockImplementation(() => {
-      throw new Error('test error');
+      throw new Error(errorMessage);
     })
     const res = await getProductsList();
     expect(res.statusCode).toBe(500);
-    expect(res.message).toBe('test error');
+    expect(res.body).toBe(JSON.stringify(errorMessage));
   });
 });

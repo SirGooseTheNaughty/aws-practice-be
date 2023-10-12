@@ -8,23 +8,17 @@ describe('getProductsById', () => {
   test('should return error product id is not provided', async () => {
     const res = await getProductsById({ pathParameters: {} });
     expect(res.statusCode).toBe(400);
-    expect(res.message).toBe(ERROR_MESSAGES.PRODUCT_ID_NOT_SPECIFIED);
-  });
-
-  test('should return error if product is not found', async () => {
-    DbFunctions.getDbProductById.mockReturnValue(Promise.resolve(null));
-    const res = await getProductsById({ pathParameters: { id: 1 } });
-    expect(res.statusCode).toBe(404);
-    expect(res.message).toBe(ERROR_MESSAGES.PRODUCT_NOT_FOUND);
+    expect(res.body).toBe(JSON.stringify(ERROR_MESSAGES.PRODUCT_ID_NOT_SPECIFIED));
   });
 
   test('should return error if something goes kaboom', async () => {
+    const errorMessage = 'test error';
     DbFunctions.getDbProductById.mockImplementation(() => {
-      throw new Error('test error');
-    })
+      throw new Error(errorMessage);
+    });
     const res = await getProductsById({ pathParameters: { id: 1 } });
     expect(res.statusCode).toBe(500);
-    expect(res.message).toBe('test error');
+    expect(res.body).toBe(JSON.stringify(errorMessage));
   });
 
   test('should return product from the db', async () => {

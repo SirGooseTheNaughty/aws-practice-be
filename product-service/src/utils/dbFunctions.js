@@ -20,7 +20,7 @@ export const getDbProducts = async () => {
   return productItems.map((productItem) => {
     const stockValue = stocksItems.find(({ product_id }) => product_id === productItem.id)?.count || 0;
     return {
-      ...stocksItems,
+      ...productItem,
       count: stockValue,
     }
   });
