@@ -8,7 +8,8 @@
     "lint": "eslint  --ignore-path .gitignore .",
     "prettier-check": "prettier -c --ignore-path .gitignore \"**/*.{css,html,js,json,md,yaml,yml}\"",
     "prettify": "prettier --write --ignore-path .gitignore \"**/*.{css,html,js,json,md,yaml,yml}\"",
-    "deploy":  "npm run test && npm run lint && sls deploy"
+    "deploy": "npm run test && npm run lint && sls deploy",
+    "deploy:nc": "sls deploy"
   },
   "author": "",
   "license": "ISC",
@@ -29,8 +30,11 @@
     "webpack-node-externals": "^3.0.0"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.427.0",
+    "@aws-sdk/lib-dynamodb": "^3.427.0",
     "@middy/core": "^4.6.4",
     "@middy/http-cors": "^4.6.4",
+    "aws-sdk": "^2.1472.0",
     "source-map-support": "^0.5.21"
   }
 }
