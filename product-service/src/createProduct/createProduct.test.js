@@ -36,6 +36,6 @@ describe('getProductsById', () => {
     const productData = { title: 'test-title', description: 'test-description', price: 1 };
     const res = await createProduct({ body: JSON.stringify(productData) });
     expect(res.statusCode).toBe(200);
-    expect(res.body).toBe(testId);
+    expect(res.body).toBe(JSON.stringify(testId));
   });
 });

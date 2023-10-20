@@ -21,7 +21,7 @@ describe('importProductsFile', () => {
 
   test('generate a correct command to s3', async () => {
     const fileName = 'file-name';
-    const response = await importProductsFile({ queryStringParameters: { name: fileName } });
+    await importProductsFile({ queryStringParameters: { name: fileName } });
     expect(s3Client.GetObjectCommand).toHaveBeenCalledWith({
       Bucket: BUCKET_NAME,
       Key: `uploaded/${fileName}.csv`,
