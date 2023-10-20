@@ -1,6 +1,7 @@
 import { createDbProduct } from '../utils/dbFunctions';
-import { withCorsHeaders } from '../utils/middleware';
-import { ERROR_MESSAGES, BadRequestError, InternalServerError } from '../utils/constants';
+import { ERROR_MESSAGES } from '../utils/constants';
+import { withCorsHeaders } from '../common/middleware';
+import { HttpSuccess, BadRequestError, InternalServerError } from '../common/httpResponses';
 
 export const createProduct = async (event = {}, context = {}) => {
   console.log(`Event: ${JSON.stringify(event)}. Context: ${JSON.stringify(context)}.`);
@@ -15,10 +16,7 @@ export const createProduct = async (event = {}, context = {}) => {
   try {
     const id = await createDbProduct({ title, description, price, stock });
 
-    return {
-      statusCode: 200,
-      body: id,
-    };
+    return new HttpSuccess(id);
   } catch (error) {
     return new InternalServerError(error?.message);
   }

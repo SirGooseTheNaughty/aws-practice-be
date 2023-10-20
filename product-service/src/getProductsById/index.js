@@ -1,6 +1,7 @@
 import { getDbProductById } from '../utils/dbFunctions';
-import { withCorsHeaders } from '../utils/middleware';
-import { ERROR_MESSAGES, BadRequestError, InternalServerError, NotFoundError } from '../utils/constants';
+import { ERROR_MESSAGES } from '../utils/constants';
+import { withCorsHeaders } from '../common/middleware';
+import { HttpSuccess, InternalServerError, BadRequestError, NotFoundError } from '../common/httpResponses';
 
 export const getProductsById = async (event = {}, context = {}) => {
   console.log(`Event: ${JSON.stringify(event)}. Context: ${JSON.stringify(context)}.`);
@@ -20,10 +21,7 @@ export const getProductsById = async (event = {}, context = {}) => {
       return new NotFoundError(ERROR_MESSAGES.PRODUCT_NOT_FOUND)
     }
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify(product),
-    };
+    return new HttpSuccess(product);
   } catch (error) {
     return new InternalServerError(error?.message);
   }
