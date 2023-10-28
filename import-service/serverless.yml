@@ -1,0 +1,62 @@
+service: import-service
+
+frameworkVersion: '3'
+
+custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+  s3BucketName: aws-practice-svorobyev-products-bucket
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: eu-west-1
+  stage: dev
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:ListBucket
+          Resource: '*'
+        - Effect: Allow
+          Action:
+            - s3:*
+          Resource: arn:aws:s3:::${self:custom.s3BucketName}/*
+
+plugins:
+  - serverless-webpack
+
+functions:
+  importProducts:
+    handler: handler.importProductsFile
+    events:
+      - httpApi:
+          path: /import
+          method: get
+          cors: true
+          request:
+            parameters:
+              querystrings:
+                name: true
+  importFileParser:
+    handler: handler.importFileParser
+    events:
+      - s3:
+          bucket: ${self:custom.s3BucketName}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: uploaded/
+          existing: true
+
+resources:
+  Resources:
+    NewResource:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.s3BucketName}
+  Outputs:
+     NewOutput:
+       Description: "Description for the output"
+       Value: "Some output value"
