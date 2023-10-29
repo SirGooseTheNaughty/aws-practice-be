@@ -7,6 +7,8 @@ custom:
     webpackConfig: ./webpack.config.js
     includeModules: true
   s3BucketName: aws-practice-svorobyev-products-bucket
+  sqsQueueName: product-import-queue
+  snsTopicName: product-import-topic
 
 provider:
   name: aws
@@ -22,8 +24,63 @@ provider:
           Resource: '*'
         - Effect: Allow
           Action:
-            - s3:*
+            - s3:GetObject
+            - s3:DeleteObject
+            - s3:GetObjectTagging
+            - s3:PutObject
+            - s3:PutObjectTagging
+            - s3:CopyObject
           Resource: arn:aws:s3:::${self:custom.s3BucketName}/*
+        - Effect: Allow
+          Action:
+            - sqs:SendMessage
+          Resource:
+            - Fn::GetAtt: [SQSQueue, Arn]
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+          Resource: 'arn:aws:dynamodb:*:*:*'
+        - Effect: Allow
+          Action:
+            - sns:Publish
+          Resource:
+            - Ref: SNSTopic
+  environment:
+    SQS_URL:
+      Ref: SQSQueue
+    SNS_ARN:
+      Ref: SNSTopic
+
+resources:
+  Resources:
+    NewResource:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.s3BucketName}
+    SQSQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:custom.sqsQueueName}
+    SNSTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: ${self:custom.snsTopicName}
+    SNSSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: sergey_vorobyev@epam.com
+        Protocol: email
+        TopicArn:
+          Ref: SNSTopic
+    OverpriceSNSSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: svorobyev@idbs.com
+        Protocol: email
+        TopicArn:
+          Ref: SNSTopic
+        FilterPolicy:
+          price: [{"numeric": [">", 20]}]
 
 plugins:
   - serverless-webpack
@@ -49,14 +106,12 @@ functions:
           rules:
             - prefix: uploaded/
           existing: true
-
-resources:
-  Resources:
-    NewResource:
-      Type: AWS::S3::Bucket
-      Properties:
-        BucketName: ${self:custom.s3BucketName}
-  Outputs:
-     NewOutput:
-       Description: "Description for the output"
-       Value: "Some output value"
+  catalogBatchProcess:
+    handler: handler.catalogBatchProcess
+    events:
+      - sqs:
+          batchSize: 5
+          arn:
+            Fn::GetAtt:
+              - SQSQueue
+              - Arn

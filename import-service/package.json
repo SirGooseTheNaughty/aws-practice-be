@@ -30,10 +30,14 @@
     "webpack-node-externals": "^3.0.0"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.438.0",
     "@aws-sdk/client-s3": "^3.431.0",
+    "@aws-sdk/client-sns": "^3.438.0",
+    "@aws-sdk/client-sqs": "^3.438.0",
+    "@aws-sdk/lib-dynamodb": "^3.438.0",
     "@aws-sdk/s3-request-presigner": "^3.431.0",
     "aws-sdk": "^2.1472.0",
-    "csv-string": "^4.1.1",
+    "csv-parser": "^3.0.0",
     "source-map-support": "^0.5.21"
   }
 }
