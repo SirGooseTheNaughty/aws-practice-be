@@ -50,13 +50,53 @@ provider:
       Ref: SQSQueue
     SNS_ARN:
       Ref: SNSTopic
+  httpApi:
+    authorizers:
+      basicAuthorizer:
+        type: request
+        functionArn: arn:aws:lambda:${aws:region}:${aws:accountId}:function:authorization-service-dev-basicAuthorizer
+        resultTtlInSeconds: 0
+        identitySource:
+          - $request.header.Authorization
+
+plugins:
+  - serverless-webpack
+
+functions:
+  importProducts:
+    handler: handler.importProductsFile
+    events:
+      - httpApi:
+          path: /import
+          method: get
+          cors: true
+          authorizer:
+            name: basicAuthorizer
+          request:
+            parameters:
+              querystrings:
+                name: true
+  importFileParser:
+    handler: handler.importFileParser
+    events:
+      - s3:
+          bucket: ${self:custom.s3BucketName}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: uploaded/
+          existing: true
+  catalogBatchProcess:
+    handler: handler.catalogBatchProcess
+    events:
+      - sqs:
+          batchSize: 5
+          arn:
+            Fn::GetAtt:
+              - SQSQueue
+              - Arn
 
 resources:
   Resources:
-    NewResource:
-      Type: AWS::S3::Bucket
-      Properties:
-        BucketName: ${self:custom.s3BucketName}
     SQSQueue:
       Type: AWS::SQS::Queue
       Properties:
@@ -81,37 +121,3 @@ resources:
           Ref: SNSTopic
         FilterPolicy:
           price: [{"numeric": [">", 20]}]
-
-plugins:
-  - serverless-webpack
-
-functions:
-  importProducts:
-    handler: handler.importProductsFile
-    events:
-      - httpApi:
-          path: /import
-          method: get
-          cors: true
-          request:
-            parameters:
-              querystrings:
-                name: true
-  importFileParser:
-    handler: handler.importFileParser
-    events:
-      - s3:
-          bucket: ${self:custom.s3BucketName}
-          event: s3:ObjectCreated:*
-          rules:
-            - prefix: uploaded/
-          existing: true
-  catalogBatchProcess:
-    handler: handler.catalogBatchProcess
-    events:
-      - sqs:
-          batchSize: 5
-          arn:
-            Fn::GetAtt:
-              - SQSQueue
-              - Arn
