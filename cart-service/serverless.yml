@@ -12,6 +12,8 @@ provider:
     DB_PORT: 5432
     DB_NAME: cart
     DB_USERNAME: postgres
+  httpApi:
+    cors: true
 
 plugins:
   - serverless-webpack
@@ -29,11 +31,9 @@ functions:
       - httpApi:
           path: /profile/cart
           method: get
-          cors: true
   addToCart:
     handler: handler.addToCart
     events:
       - httpApi:
           path: /profile/cart
           method: post
-          cors: true
