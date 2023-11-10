@@ -44,3 +44,9 @@ functions:
       - httpApi:
           path: /profile/cart
           method: put
+  order:
+    handler: handler.order
+    events:
+      - httpApi:
+          path: /order
+          method: put

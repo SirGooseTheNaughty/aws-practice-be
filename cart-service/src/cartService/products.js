@@ -27,7 +27,7 @@ export const mergeProductsData = async (cartProducts) => {
   if (!productIds?.length) {
     return [];
   }
-  const dbProducts = await getDbProductsByIds();
+  const dbProducts = await getDbProductsByIds(productIds);
   return cartProducts.map(({ product_id, count }) => {
     const dbProduct = dbProducts.find(({ id }) => id === product_id);
     return {

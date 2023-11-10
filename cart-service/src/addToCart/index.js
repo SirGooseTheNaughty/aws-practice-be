@@ -1,16 +1,10 @@
-import { withCorsHeaders } from '../common/middleware';
-import { HttpSuccess, InternalServerError, UnauthorizedError } from '../common/httpResponses';
+import { withAuthCheck, withCorsHeaders } from '../common/middleware';
+import { HttpSuccess, InternalServerError } from '../common/httpResponses';
 import { addProductToCart } from '../cartService';
 import { ERROR_MESSAGES } from '../common/constants';
-import { getBasicTokenFromHeaders } from '../common/utils';
 
 export const addToCart = async (event = {}) => {
   console.log(`Event: ${JSON.stringify(event)}`);
-
-  const token = getBasicTokenFromHeaders(event?.headers);
-  if (!token) {
-    return new UnauthorizedError('No token found');
-  }
 
   const { product, count = 1 } = JSON.parse(event.body);
   if (!product?.id) {
@@ -21,11 +15,11 @@ export const addToCart = async (event = {}) => {
   }
 
   try {
-    const result = await addProductToCart(token, product.id, count);
-    return new HttpSuccess(result?.rowCount);
+    const result = await addProductToCart(event.token, product.id, count);
+    return new HttpSuccess(result);
   } catch (error) {
     return new InternalServerError(error?.message);
   }
 };
 
-export default withCorsHeaders(addToCart);
+export default withCorsHeaders(withAuthCheck(addToCart));

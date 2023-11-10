@@ -98,7 +98,7 @@ const addOrCreateProductToCart = async (client, cartId, productId, count = 1) =>
     });
   }
   console.log(`Resulting product: `, JSON.stringify(product));
-  return product;
+  return product?.rowCount;
 };
 
 export const addProductToCart = async (token, productId, count) => {
@@ -108,4 +108,44 @@ export const addProductToCart = async (token, productId, count) => {
   const result = await addOrCreateProductToCart(client, cartId, productId, count);
   await client.end();
   return result;
+};
+
+const createAnOrder = async (client, userId, cartId) => {
+  console.log(`Placing an order for user ${userId} and cart ${cartId}`);
+  const orderQueryResult = await client.query({
+    text: 'INSERT INTO orders (user_id, cart_id, status) values ($1, $2, $3) RETURNING id',
+    values: [userId, cartId, 'OPEN']
+  });
+  const orderId = orderQueryResult.rows[0]?.id;
+  console.log(`Placed an order with id ${orderId}`);
+  return orderId;
+};
+
+const setCartToOrdered = (client, cartId) => {
+  console.log(`Setting cart ${cartId} status to ${CART_STATUSES.ORDERED}`);
+  return client.query({
+    text: 'UPDATE carts SET status=$1 WHERE id=$2',
+    values: [CART_STATUSES.ORDERED, cartId]
+  });
+};
+
+export const placeOrder = async (token) => {
+  const client = await getClient();
+  let orderId;
+
+  try {
+    await client.query('BEGIN');
+    const userId = await getOrCreateUser(client, token);
+    const cartId = await getActiveUserCart(client, userId);
+    orderId = await createAnOrder(client, userId, cartId);
+    await setCartToOrdered(client, cartId);
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    await client.end();
+  }
+
+  return orderId;
 };
