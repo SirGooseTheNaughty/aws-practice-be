@@ -1,6 +1,7 @@
 import { withCorsHeaders } from '../common/middleware';
 import { HttpSuccess, InternalServerError } from '../common/httpResponses';
 import { findOrCreateByUserId } from '../cartService';
+import { mergeProductsData } from '../cartService/products';
 
 export const getCart = async (event = {}, context = {}) => {
   console.log(`Event: ${JSON.stringify(event)}. Context: ${JSON.stringify(context)}. Env: ${JSON.stringify(process.env)}`);
@@ -8,7 +9,8 @@ export const getCart = async (event = {}, context = {}) => {
 
   try {
     const cart = await findOrCreateByUserId(userId);
-    return new HttpSuccess(cart?.rows);
+    const products = await mergeProductsData(cart?.rows);
+    return new HttpSuccess(products);
   } catch (error) {
     return new InternalServerError(error?.message);
   }

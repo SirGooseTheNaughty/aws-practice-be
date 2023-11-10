@@ -14,6 +14,13 @@ provider:
     DB_USERNAME: postgres
   httpApi:
     cors: true
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:BatchGetItem
+          Resource: 'arn:aws:dynamodb:*:*:*'
 
 plugins:
   - serverless-webpack
@@ -36,4 +43,4 @@ functions:
     events:
       - httpApi:
           path: /profile/cart
-          method: post
+          method: put

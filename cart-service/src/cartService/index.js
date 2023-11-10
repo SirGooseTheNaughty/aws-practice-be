@@ -42,12 +42,11 @@ export const findOrCreateByUserId = async (userId, existingClient = null) => {
   }
   if (!existingClient) {
     await client.end();
-    console.log('Client disconnected in findOrCreateByUserId');
   }
   return data;
 };
 
-const addOrCreateProductToCart = async (client, cartId, productId) => {
+const addOrCreateProductToCart = async (client, cartId, productId, count = 1) => {
   let product = await client.query({
     text: 'SELECT * FROM cart_items WHERE cart_id = $1 AND product_id=$2',
     values: [cartId, productId]
@@ -55,27 +54,25 @@ const addOrCreateProductToCart = async (client, cartId, productId) => {
   console.log(`For cartId ${cartId} and productId ${productId} got product: `, JSON.stringify(product));
   if (!product?.rows?.[0]) {
     product = await client.query({
-      text: 'INSERT INTO cart_items (cart_id, product_id, count) values ($1, $2, 1)',
-      values: [cartId, productId]
+      text: 'INSERT INTO cart_items (cart_id, product_id, count) values ($1, $2, $3)',
+      values: [cartId, productId, count]
     });
   } else {
-    const count = product?.rows?.[0]?.count || 0;
     const productId = product?.rows?.[0]?.product_id || 0;
     product = await client.query({
       text: 'UPDATE cart_items SET count=$1 WHERE cart_id=$2 AND product_id=$3',
-      values: [count + 1, cartId, productId]
+      values: [count, cartId, productId]
     });
   }
   console.log(`Resulting product: `, JSON.stringify(product));
   return product;
 };
 
-export const addProductToCart = async (userId, productId) => {
+export const addProductToCart = async (userId, productId, count) => {
   const client = await getClient();
   const cart = await findOrCreateByUserId(userId, client);
   const cartId = cart?.rows?.[0]?.id;
-  const result = await addOrCreateProductToCart(client, cartId, productId);
+  const result = await addOrCreateProductToCart(client, cartId, productId, count);
   await client.end();
-  console.log('Client disconnected in addProductToCart');
   return result;
 };
