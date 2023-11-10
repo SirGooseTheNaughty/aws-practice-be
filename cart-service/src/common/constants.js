@@ -13,3 +13,7 @@ export const ERROR_MESSAGES = {
   NO_ID: 'Product ID should be provided',
   COUNT_IS_NOT_A_NUMBER: 'Count value should be a number',
 }
+
+export const CART_STATUSES = {
+  OPEN: 'OPEN',
+}

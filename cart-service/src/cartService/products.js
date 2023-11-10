@@ -1,5 +1,5 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, ScanCommand, TransactWriteCommand, BatchGetCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, BatchGetCommand } from '@aws-sdk/lib-dynamodb';
 import { DB_NAMES, EMPTY_PRODUCT } from '../common/constants';
 
 const client = new DynamoDBClient({});
@@ -20,10 +20,14 @@ export const getDbProductsByIds = async (productIds) => {
 };
 
 export const mergeProductsData = async (cartProducts) => {
-  if (!cartProducts) {
+  if (!cartProducts?.length) {
     return [];
   }
-  const dbProducts = await getDbProductsByIds(cartProducts.map(({ product_id }) => product_id).filter((product) => !!product));
+  const productIds = cartProducts.map(({ product_id }) => product_id).filter((product) => !!product);
+  if (!productIds?.length) {
+    return [];
+  }
+  const dbProducts = await getDbProductsByIds();
   return cartProducts.map(({ product_id, count }) => {
     const dbProduct = dbProducts.find(({ id }) => id === product_id);
     return {

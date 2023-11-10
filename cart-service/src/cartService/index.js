@@ -1,4 +1,7 @@
 import { Client } from 'pg';
+import { v4 as uuidv4 } from 'uuid';
+import { getCurrentDate } from '../common/utils';
+import { CART_STATUSES } from '../common/constants';
 
 const getClient = async () => {
   const client = new Client({
@@ -16,34 +19,64 @@ const getClient = async () => {
   return client;
 }
 
-export const getCart = async (client, userId) => {
-  console.log(`Getting a cart for user ${userId}`);
-  return client.query({
-    text: 'SELECT * FROM carts RIGHT JOIN cart_items ON carts.id=cart_items.cart_id WHERE user_id = $1',
-    values: [userId]
+export const getOrCreateUser = async (client, token) => {
+  console.log(`Looking for user with token ${token}`);
+  const userQueryResult = await client.query({
+    text: 'SELECT id FROM users WHERE token = $1',
+    values: [token]
   });
+  const userId = userQueryResult.rows[0]?.id;
+  if (userId) {
+    console.log(`Found a user with id ${userId}`);
+    return userId;
+  }
+  const newUserQueryResult = await client.query({
+    text: 'INSERT INTO users (token) values ($1) RETURNING id',
+    values: [token]
+  });
+  const newUserId = newUserQueryResult.rows[0]?.id;
+  console.log(`Created a user with id ${newUserId}`);
+  return newUserId;
 };
 
-export const createCart = async (client, userId) => {
-  console.log(`Creating a cart for user ${userId}`);
-  const dateObject = new Date();
-  const date = dateObject.toISOString().split('T')[0];
-  return client.query({
-    text: `INSERT INTO carts (user_id, created_at, updated_at, status) values ($1, $2, $3, $4)`,
-    values: [userId, date, date, 'OPEN']
+export const getActiveUserCart = async (client, userId) => {
+  console.log(`Looking for an OPEN cart for a user with id ${userId}`);
+  const cartQueryResult = await client.query({
+    text: 'SELECT id FROM carts WHERE user_id=$1 AND status=$2',
+    values: [userId, CART_STATUSES.OPEN]
   });
+  const cartId = cartQueryResult.rows[0]?.id;
+  if (cartId) {
+    console.log(`Found a cart with id ${cartId}`);
+    return cartId;
+  }
+  const date = getCurrentDate();
+  const newCartQueryResult = await client.query({
+    text: 'INSERT INTO carts (user_id, created_at, updated_at, status) values ($1, $2, $2, $3) RETURNING id',
+    values: [userId, date, CART_STATUSES.OPEN],
+  });
+  const newCartId = newCartQueryResult.rows[0]?.id;
+  console.log(`Created a cart with id ${newCartId}`);
+  return newCartId;
 };
 
-export const findOrCreateByUserId = async (userId, existingClient = null) => {
-  const client = existingClient || await getClient();
-  let data = await getCart(client, userId);
-  if (!data) {
-    data = await createCart(client, userId);
-  }
-  if (!existingClient) {
-    await client.end();
-  }
-  return data;
+export const getCart = async (client, cartId) => {
+  console.log(`Getting a cart by id ${cartId}`);
+  const cartQueryResult = await client.query({
+    text: 'SELECT * FROM carts INNER JOIN cart_items ON carts.id=cart_items.cart_id WHERE id = $1',
+    values: [cartId]
+  });
+  console.log(`Got a cart with id ${cartId}: `, cartQueryResult.rows);
+  return cartQueryResult.rows;
+};
+
+export const getUserCart = async (token) => {
+  const client = await getClient();
+  const userId = await getOrCreateUser(client, token);
+  const cartId = await getActiveUserCart(client, userId);
+  const cart = await getCart(client, cartId);
+  await client.end();
+  return cart;
 };
 
 const addOrCreateProductToCart = async (client, cartId, productId, count = 1) => {
@@ -68,10 +101,10 @@ const addOrCreateProductToCart = async (client, cartId, productId, count = 1) =>
   return product;
 };
 
-export const addProductToCart = async (userId, productId, count) => {
+export const addProductToCart = async (token, productId, count) => {
   const client = await getClient();
-  const cart = await findOrCreateByUserId(userId, client);
-  const cartId = cart?.rows?.[0]?.id;
+  const userId = await getOrCreateUser(client, token);
+  const cartId = await getActiveUserCart(client, userId);
   const result = await addOrCreateProductToCart(client, cartId, productId, count);
   await client.end();
   return result;
