@@ -1,0 +1,52 @@
+service: cart-service
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: eu-west-1
+  stage: dev
+  environment:
+    DB_ENDPOINT: aws-practice-cart.c9gob7co9clu.eu-west-1.rds.amazonaws.com
+    DB_PORT: 5432
+    DB_NAME: cart
+    DB_USERNAME: postgres
+  httpApi:
+    cors: true
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:BatchGetItem
+          Resource: 'arn:aws:dynamodb:*:*:*'
+
+plugins:
+  - serverless-webpack
+  - serverless-dotenv-plugin
+
+custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true # enable auto-packing of external modules
+
+functions:
+  getCart:
+    handler: handler.getCart
+    events:
+      - httpApi:
+          path: /profile/cart
+          method: get
+  addToCart:
+    handler: handler.addToCart
+    events:
+      - httpApi:
+          path: /profile/cart
+          method: put
+  order:
+    handler: handler.order
+    events:
+      - httpApi:
+          path: /order
+          method: put
